@@ -1,0 +1,97 @@
+---
+title       : Monty Hall Problem
+subtitle    : Solved Using Simulation and R
+author      : Tony Smaldone
+job         : 
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : [mathjax]            # {mathjax, quiz, bootstrap}
+mode        : standalone # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## Monty Hall Problem 
+
+The Monty Hall Problem (MHP) is a classic statistical brain-teaser. The game, derived from the TV show *Let's
+Make a Deal* and hosted by *Monty Hall*, goes like this:
+
+* A prize exists behind one of three doors
+* The contestant chooses one of the three doors
+* The host (Monty Hall) shows the contestant what's behind one of the remaining two doors, then asks
+the contestant whether they would like to switch their choice  
+* Should the contestant switch?? **Does the contestant have a better chance of winning if they were to switch????**
+
+To explore the answer, will use **computer simulation** to randomly play games and see what happens.
+
+The intent is to not only answer the MHP problem, **but to demonstrate the value of using computer simulation**.
+
+--- .class #id 
+
+## Simulation Overview
+
+* Using the uniform distribution randomly choose the door behind which the prize is placed, the door initially picked by the contestant, the door to show the contestant from the remaining possible doors and the door the contestant will switch to (from the remaining possible doors) if the contestant chooses to switch doors
+* Use a fixed probability of contestant switching across all games (range between 0 - never switch - and 1 - always switch); run 10, 100, 500 and 1000 games, collect the results for each set of games and summarize the results and use [R] (https://www.r-project.org/about.html) to drive the simulation (the `Shiny` app allows for variations in these parameters)
+* `R` version and `dplyr` package used in this simulation:
+
+```{r, echo = FALSE}
+R.version.string
+```
+
+```{r, echo = FALSE}
+packageVersion("dplyr")
+```
+
+
+--- .class #id
+
+## Simulation Execution Results
+
+The results are (`R` code hidden, ran with `echo = FALSE`):
+
+```{r,echo =  FALSE}
+library(dplyr)
+library(ggplot2)
+source("../appMonte.R")
+source("../appSummary.R")
+source("../appTable.R")
+numRuns <- c(10,100,500,1000)
+pSwitch <- .5
+par(mfrow=c(2,2))
+for (i in numRuns) {
+           gameData <- appMonte(as.integer(i),pSwitch,1)
+           gamesSummary <- appSummary(gameData,i,pSwitch,1)
+           if (is.nan(gamesSummary$"P[Win|Switch]") | is.nan(gamesSummary$"P[Win|No Switch]")) {
+              theTop <-.8
+           }
+           else {
+              theTop<-max(gamesSummary$"P[Win|Switch]",gamesSummary$"P[Win|No Switch]") + .2
+           }
+           barplot(c(gamesSummary$"P[Win|Switch]",gamesSummary$"P[Win|No Switch]"),
+              names.arg=c("Switch", "No Switch"),
+              ylab="Probability",
+              xlab=paste("Prob of Switch = ",pSwitch),
+              ylim=c(0,theTop),
+              col=c("red","blue"),
+              main=paste("Monty Hall ",i," Games"))
+}
+```
+
+--- .class #id
+
+## Conclusion
+
+The MHP has stymied many (statisticians included). The not so intuitive answer is that the contestant has a better chance of winning by switching (two-thirds to one-third). This application used simulation to *actually* play the game on large scales, something that would be impractical to actually do. This is but one benefit of simulation - **to explore some phenomena which would be impossible, or impractical, to do otherwise**. Future work will 
+
+* Provide more flexibility on control of random parameters
+* Enhanced output
+* Explore other variations on the game 
+  * What if there were five doors? 
+  * Phrase-ology of the question posed to the contestant
+
+The actual `shiny` app can be viewed at [MHP] (https://tsmaldone.shinyapps.io/shinyApp). The code can be viewed at [Code] (https://github.com/tsmaldone/shinyApp)
+
+In summary: **Simulation was used to clearly prove out the not so intuitive theorectical answer**
+
+**Thank you for your attention!!**
+
